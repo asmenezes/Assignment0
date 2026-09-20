@@ -30,7 +30,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-           path: 'build/'  # this should match the `pages` option in your adapter-static options
+           path: '.svelte-kit/output/server/'  # this should match the `pages` option in your adapter-static options
 
   deploy:
     # (optional) Uncomment the line below will deploy to GitHub Pages only if the commit message contains "publish" 

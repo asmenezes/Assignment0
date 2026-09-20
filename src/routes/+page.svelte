@@ -13,6 +13,7 @@
   <img
     width="200px"
     src="url to your favorite image"
+    alt="fav Img"
   />
   <div>
     You can click up to
@@ -39,9 +40,9 @@
     {/if}
   
   <style>
-    body {
+    /* body {
       font-family: Arial, Helvetica, sans-serif;
-    }
+    } */
     button {
       background-color: #44aa66;
       /* background-color: blue; */
