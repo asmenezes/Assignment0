@@ -1,4 +1,5 @@
 <script>
+import image from '$lib/assets/favicon.svg';
     let maxClick = $state(6);
     let cnt = $state(0); // tip: https://svelte.dev/docs/svelte/$state
   
@@ -12,8 +13,8 @@
   <h1>Andrew's VIS Site</h1>
   <img
     width="200px"
-    src="url to your favorite image"
-    alt="fav Img"
+    src=image
+    alt="Sebasian Stam Pexels"
   />
   <div>
     You can click up to
