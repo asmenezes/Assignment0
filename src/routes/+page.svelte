@@ -1,5 +1,5 @@
 <script>
-import image from '$lib/assets/favicon.svg';
+import image from '$lib/assets/pexels.jpg';
     let maxClick = $state(6);
     let cnt = $state(0); // tip: https://svelte.dev/docs/svelte/$state
   
@@ -13,7 +13,7 @@ import image from '$lib/assets/favicon.svg';
   <h1>Andrew's VIS Site</h1>
   <img
     width="200px"
-    src=image
+    src={image}
     alt="Sebasian Stam Pexels"
   />
   <div>
