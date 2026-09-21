@@ -17,7 +17,7 @@ export default defineConfig({
 			//adapter: adapter()
 			adapter: adapter({
 				fallback: '404.html',
-				pages: "build"
+				pages: "build/"
 			}),
 		})
 	]
