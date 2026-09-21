@@ -16,8 +16,8 @@ export default defineConfig({
 			// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 			//adapter: adapter()
 			adapter: adapter({
-				fallback: '404.html',
-				pages: "build/"
+				fallback: '404.html'//,
+				//pages: "build/"
 			}),
 		})
 	]
