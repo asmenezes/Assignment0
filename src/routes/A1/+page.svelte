@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as d3 from "d3";
   import { onMount } from "svelte";
+  import { Bar } from "$lib";
   import type { TMovie } from "../../types";
 
   // Reactive variable for storing the data
@@ -38,4 +39,4 @@
 <h1>Summer Movies</h1>
 
 <p>Here are {movies.length == 0 ? "..." : movies.length + " "} movies</p>
-<!-- <Bar {movies} /> -->
+ <Bar {movies} />
