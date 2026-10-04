@@ -37,6 +37,7 @@
 
   const genreNums = $derived(getGenreNums(movies, upYear));
   const genres = $derived(Object.keys(genreNums));
+
   // drawing the bar chart
 
   const margin = {
@@ -116,12 +117,12 @@
             fill="#449900"
             class="bar"
             opacity={1}
-            // onmouseover={() => {
-            //   xxxx
-            // }}
-            // onmouseout={() => {
-            //   xxxx
-            // }}
+            onmouseover={() => {
+              selectedGenre = genre;
+            }}
+            onmouseout={() => {
+              selectedGenre = null;
+            }}
           />
 
 
@@ -132,7 +133,8 @@
             text-anchor="middle"
           >
           <!-- tip: the text below should change with the hover on interaction -->
-            {cnt} 
+            
+             {selectedGenre === genre ? `${genre}: ${cnt}` : cnt}
           </text>
         </g>
       {/each}
