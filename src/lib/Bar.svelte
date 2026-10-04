@@ -116,7 +116,7 @@
             y={yScale(cnt)}
             fill="#449900"
             class="bar"
-            opacity={1}
+            opacity={selectedGenre === genre ? 1 : 0.5}
             onmouseover={() => {
               selectedGenre = genre;
             }}
