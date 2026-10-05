@@ -1,11 +1,11 @@
 <script lang="ts">
   import * as d3 from "d3";
   import { onMount } from "svelte";
-  import { Bar } from "$lib";
+  import { Bar, StackedBar, RankedBar } from "$lib";
   import type { TMovie } from "../../types";
 
   // Reactive variable for storing the data
-  let movies: TMovie[] = [];
+  let movies: TMovie[] = $state([]);
 
   // Function to load the CSV
   async function loadCsv() {
@@ -24,6 +24,11 @@
           genres: row.genres.split(",").map((genre) => genre.trim()),
           year: new Date(row.year),
           average_rating: Number(row.average_rating),
+          tconst: row.tconst,
+          title_type: row.title_type,
+          primary_title: row.primary_title,
+          original_title: row.original_title,
+          simple_title: row.simple_title,
         };
       });
 
@@ -39,4 +44,6 @@
 <h1>Summer Movies</h1>
 
 <p>Here are {movies.length == 0 ? "..." : movies.length + " "} movies</p>
- <Bar {movies} />
+<Bar {movies} />
+<StackedBar {movies} />
+<RankedBar {movies} />

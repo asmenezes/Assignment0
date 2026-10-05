@@ -121,7 +121,7 @@
               selectedGenre = genre;
             }}
             onmouseout={() => {
-              selectedGenre = null;
+              selectedGenre = "";
             }}
           />
 
