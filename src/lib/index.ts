@@ -2,4 +2,6 @@
 import Bar from './Bar.svelte'
 import StackedBar from './StackedBar.svelte'
 import RankedBar from './RankedBar.svelte'
-export {Bar, StackedBar, RankedBar}
+import Scatter from './Scatter.svelte'
+import Line from './Line.svelte'
+export {Bar, StackedBar, RankedBar, Scatter, Line}
