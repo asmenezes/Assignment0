@@ -31,22 +31,22 @@
     d3
       .scaleTime()
       .domain(d3.extent(data.map((d) => d.x)) as [Date, Date])
-      .range([usableArea.left, usableArea.right])
+      .range([usableArea.left, usableArea.right]),
   );
 
   const yScale = $derived(
     d3
       .scaleLinear()
       .domain(d3.extent(data.map((d) => d.y)) as [number, number])
-      .range([usableArea.bottom, usableArea.top])
+      .range([usableArea.bottom, usableArea.top]),
   );
 
   // tip2: this line generator will create a svg path from the data
-  // const lineGenerator = d3
-  //     .line()
-  //     .x((d) => xScale(d.x)) // Map x-coordinate
-  //     .y(xxx); // Map y-coordinate
-  //     .curve(d3.curveBasis);
+  const lineGenerator = d3
+    .line()
+    .x((d) => xScale(d.x)) // Map x-coordinate
+    .y((d) => yScale(d.y)) // Map y-coordinate
+    .curve(d3.curveBasis);
 
   const path = $derived(lineGenerator(data));
 
@@ -62,16 +62,17 @@
 
     d3.select(yAxis).call(d3.axisLeft(yScale));
   }
-
+  let brushGroup: any = $state();
+  let brushedRange = $state<[number, number] | null>(null);
   function handleBrush(event: any) {
     // tip3: this function will be called at Brush end, and we will use it to update the yearRange
-    // const selection = event.selection;
-    // if (selection) {
-    //     const [start, end] = selection.map(["which scale should we use here?"].invert); // Convert from pixel values to Date
-    //     yearRange = xxx
-    // } else {
-    //     yearRange = xxxx
-    // }
+    const selection = event.selection;
+    if (selection) {
+        const [start, end] = selection.map(xScale.invert); // Convert from pixel values to Date
+        yearRange = [start,end]
+    } else {
+        yearRange = undefined
+    }
   }
 
   function setupBrush() {
@@ -95,19 +96,24 @@
 
 <svg {width} {height} class="line">
   <!-- tip2: add the line here, the circles can help validate your curve -->
-  <!-- <path d={path} fill=xx stroke=xx stroke-width="1" /> -->
-  <!-- <g class="points">
-        {#each data as point (point.x)}
-            <circle
-                xxx
-            />
-        {/each}
-    </g> -->
+  <path d={path} fill="white" stroke="black" stroke-width="1" />
+  <g class="points">
+    {#each data as point (point.x)}
+      <circle
+        cx={xScale(point.x)}
+        cy={yScale(point.y)}
+        r={3}
+        opacity={0.7}
+        fill="black"transparent
+        stroke-width="1"
+      />
+    {/each}
+  </g>
   <g transform="translate(0, {usableArea.bottom})" bind:this={xAxis} />
   <g transform="translate({usableArea.left}, 0)" bind:this={yAxis} />
 
   <!-- tip3: add the brush here. -->
-  <!-- <g class="brush" bind:this={xxx} /> -->
+  <g class="brush" bind:this={brushElement} />
 
   <text x={width / 2} y={height - 5} text-anchor="middle">
     Number of Movies by Year:

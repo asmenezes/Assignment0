@@ -108,11 +108,11 @@
 
     function handleMovieClick(movie: TMovie) {
         // tip1: update the selectedMovie variable
-        // if (selectedMovie == movie) {
-        //     xxx
-        // } else {
-        //     xxx
-        // }
+        if (selectedMovie == movie) {
+            console.log(selectedMovie)
+        } else {
+            selectedMovie = undefined;
+        }
     }
 
     // the $effect function is used to run a function whenever the reactive variables change, also known as a side effect
