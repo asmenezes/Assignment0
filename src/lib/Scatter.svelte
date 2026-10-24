@@ -109,9 +109,9 @@
     function handleMovieClick(movie: TMovie) {
         // tip1: update the selectedMovie variable
         if (selectedMovie == movie) {
-            console.log(selectedMovie)
-        } else {
             selectedMovie = undefined;
+        } else {
+            selectedMovie = movie;
         }
     }
 
