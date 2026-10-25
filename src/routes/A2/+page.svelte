@@ -87,29 +87,29 @@
     {#if movies.length > 0}
         <div class="selectors">
             <!-- tip4: add the selectors for binding data attributes with x axis, y axis, and size. You will need to use bind:value for each selector.  -->
-            <!-- 
+            
           X Axis:
-         <select bind:value={xxx}>
-              {#each xxx}
+         <select bind:value={axisSelection.x}>
+              {#each attrOptionsX as key}
                   <option value={key}>{key}</option>
               {/each}
           </select>
 
           Y Axis:
-          <select bind:value={xxx}>
-              {#each xxx}
+          <select bind:value={axisSelection.y}>
+              {#each attrOptionsY as key}
                   <option value={key}>{key}</option>
               {/each}
           </select>
 
           Size:
-          <select bind:value={xxx}>
-              {#each xxx}
+          <select bind:value={axisSelection.size}>
+              {#each attrOptionsS as key}
                   <option value={key}>{key}</option>
               {/each}
           </select>
 
-          --->
+          -
         </div>
 
         <Scatter
