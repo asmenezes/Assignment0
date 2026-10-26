@@ -1,14 +1,14 @@
 <script lang="ts">
     import * as d3 from "d3";
-    import { Scatter, Line } from "$lib";
+    import { Scatter, Line, Parallel } from "$lib";
     import { onMount } from "svelte";
     import type { TMovie } from "../../types";
+    import Heat from "$lib/Heat.svelte";
 
     // Reactive variable for storing the data
     let movies: TMovie[] = $state([]);
-
     let yearRange: [Date, Date] | undefined = $state();
-
+    let brushedMovies = $state<TMovie[]>([]);
     function getYearCountArray(movies: TMovie[]) {
         let yearCount: { [year: number]: number } = {};
         const allYears = [...new Set(movies.map((d) => d.year.getFullYear()))];
@@ -37,6 +37,9 @@
         x: keyof TMovie;
         y: keyof TMovie;
         size: keyof TMovie;
+        cat: keyof TMovie;
+        hx: keyof TMovie;
+        hy: keyof TMovie;
     };
 
     // tip4: axisSelection is a reactive variable that stores the axis selection
@@ -44,6 +47,9 @@
         x: "year",
         y: "average_rating",
         size: "num_votes",
+        cat: "genres",
+        hx: "genres",
+        hy: "year"
     });
 
     // Function to load the CSV
@@ -67,6 +73,7 @@
             console.error("Error loading CSV:", error);
         }
     }
+
     // Call the loader when the component mounts
     onMount(loadCsv);
 
@@ -78,6 +85,13 @@
     const attrOptionsS = $derived(
         movies[0] ? Object.keys(movies[0]).filter((d) => d != "genres") : [],
     );
+    const attrOptionsCat = $derived(movies[0] ? Object.keys(movies[0]) : []);
+    const attrOptionsHX = $derived(
+        movies[0] ? Object.keys(movies[0]).filter((d) => d != "genres") : [],
+    );
+    const attrOptionsHY = $derived(
+        movies[0] ? Object.keys(movies[0]).filter((d) => d != "genres") : [],
+    );
 </script>
 
 <div class="container">
@@ -87,29 +101,29 @@
     {#if movies.length > 0}
         <div class="selectors">
             <!-- tip4: add the selectors for binding data attributes with x axis, y axis, and size. You will need to use bind:value for each selector.  -->
-            
-          X Axis:
-         <select bind:value={axisSelection.x}>
-              {#each attrOptionsX as key}
-                  <option value={key}>{key}</option>
-              {/each}
-          </select>
 
-          Y Axis:
-          <select bind:value={axisSelection.y}>
-              {#each attrOptionsY as key}
-                  <option value={key}>{key}</option>
-              {/each}
-          </select>
+            X Axis:
+            <select bind:value={axisSelection.x}>
+                {#each attrOptionsX as key}
+                    <option value={key}>{key}</option>
+                {/each}
+            </select>
 
-          Size:
-          <select bind:value={axisSelection.size}>
-              {#each attrOptionsS as key}
-                  <option value={key}>{key}</option>
-              {/each}
-          </select>
+            Y Axis:
+            <select bind:value={axisSelection.y}>
+                {#each attrOptionsY as key}
+                    <option value={key}>{key}</option>
+                {/each}
+            </select>
 
-          -
+            Size:
+            <select bind:value={axisSelection.size}>
+                {#each attrOptionsS as key}
+                    <option value={key}>{key}</option>
+                {/each}
+            </select>
+
+            -
         </div>
 
         <Scatter
@@ -125,6 +139,58 @@
         <br />
 
         <Line data={yearCountArray} bind:yearRange />
+        <div class="selectors">
+            <!-- tip4: add the selectors for binding data attributes with x axis, y axis, and size. You will need to use bind:value for each selector.  -->
+
+            Category:
+            <select bind:value={axisSelection.cat}>
+                {#each attrOptionsCat as key}
+                    <option value={key}>{key}</option>
+                {/each}
+            </select>
+
+            X Axis:
+            <select bind:value={axisSelection.hx}>
+                {#each attrOptionsX as key}
+                    <option value={key}>{key}</option>
+                {/each}
+            </select>
+
+            Y Axis:
+            <select bind:value={axisSelection.hy}>
+                {#each attrOptionsHY as key}
+                    <option value={key}>{key}</option>
+                {/each}
+            </select>
+
+            -
+        </div>
+        <Parallel
+            movies={yearRange && brushedMovies.length
+                ? brushedMovies.filter(
+                      (d) => d.year <= yearRange[1] && d.year >= yearRange[0],
+                  )
+                :yearRange ?
+                 movies.filter(
+                      (d) => d.year <= yearRange[1] && d.year >= yearRange[0],
+                  ):
+                brushedMovies.length
+                  ? brushedMovies
+                  : movies}
+            bind:yearRange
+            category={axisSelection.cat}
+        />
+        <Heat
+            xCategory={axisSelection.hx}
+            yCategory={axisSelection.hy}
+            movies={yearRange
+                ? movies.filter(
+                      (d) => d.year <= yearRange[1] && d.year >= yearRange[0],
+                  )
+                : movies}
+            bind:yearRange
+            onSelectionChange={(selected) => (brushedMovies = selected)}
+        />
     {/if}
 </div>
 
