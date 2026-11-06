@@ -22,9 +22,9 @@
     let stackData: TStackRow[] = $state([]);
     const genres = ["Comedy", "Romance", "Drama"];
     const genreColors: Record<string, number> = {
-        Comedy: 0xf4a261,  // warm orange
-        Romance: 0xe76f51,  // coral red
-        Drama: 0x2a9d8f,   // teal
+        Comedy: 0xf4a261, // warm orange
+        Romance: 0xe76f51, // coral red
+        Drama: 0x2a9d8f, // teal
     };
 
     // === TODO-1: Load Data ===
@@ -34,14 +34,53 @@
     //   - Group movies by year (movie.year.getFullYear())
     //   - Count how many movies belong to each genre (Comedy, Romance, Drama)
     //   - Build a TStackRow[] array sorted by year
-    async function loadCsv() {
-        stackData = [
-            { year: "2000", Comedy: 5, Romance: 3, Drama: 8 },
-            { year: "2005", Comedy: 7, Romance: 4, Drama: 6 },
-            { year: "2010", Comedy: 3, Romance: 6, Drama: 10 },
-        ];
-        console.log("Stack data:", stackData);
+    async function loadCsv(): Promise<TStackRow[]> {
+        try {
+            movies = await d3.csv("./summer_movies.csv", (row) => ({
+                ...row,
+                num_votes: Number(row.num_votes),
+               runtime_minutes: Number(row.runtime_minutes),
+                genres: row.genres.split(",").map((genre) => genre.trim()),
+                year: new Date(row.year),
+                average_rating: Number(row.average_rating),
+            }));
+
+            const rowsByYear = new Map<string, TStackRow>();
+
+            movies.forEach((movie) => {
+                const year = String(movie.year.getFullYear());
+                const row = rowsByYear.get(year) ?? {
+                    year,
+                    Comedy: 0,
+                    Romance: 0,
+                    Drama: 0,
+                };
+
+                movie.genres.forEach((genre) => {
+                    if (genre in row && genre !== "year") {
+                        row[genre as keyof Omit<TStackRow, "year">] += 1;
+                    }
+                });
+
+                rowsByYear.set(year, row);
+            });
+
+            return [...rowsByYear.values()].sort(
+                (a, b) => Number(a.year) - Number(b.year),
+            );
+        } catch (error) {
+            console.error("Error loading CSV:", error);
+           return [];
+        }
     }
+    // async function loadCsv() {
+    //     stackData = [
+    //         { year: "2000", Comedy: 5, Romance: 3, Drama: 8 },
+    //         { year: "2005", Comedy: 7, Romance: 4, Drama: 6 },
+    //         { year: "2010", Comedy: 3, Romance: 6, Drama: 10 },
+    //     ];
+    //     console.log("Stack data:", stackData);
+    // }
     // === END TODO-1 ===
 
     let container: HTMLElement;
@@ -59,11 +98,10 @@
     const ORBIT_RX = 850;
     const ORBIT_RZ = 400;
 
-
     let animating = $state(false);
 
     onMount(async () => {
-        await loadCsv();
+        stackData = await loadCsv();
         init(window.innerWidth, window.innerHeight);
     });
 
@@ -203,7 +241,8 @@
             { startAngle: Math.PI, orbitSpeed: 0.4 },
         ];
         horseConfigs.forEach((config) => {
-            gltfLoader.load("3d/Horse.glb", (gltf) => { // TODO: replace with your model
+            gltfLoader.load("3d/Horse.glb", (gltf) => {
+                // TODO: replace with your model
                 const mesh = gltf.scene.children[0].clone() as THREE.Mesh;
                 (mesh as any).material = (mesh as any).material.clone();
                 mesh.scale.set(0.5, 0.5, 0.5);
@@ -247,7 +286,7 @@
     // TODO-3a: Define a unique 3D shape and material per genre.
     //   Docs: https://threejs.org/docs/#api/en/geometries
     //   Docs: https://threejs.org/docs/#api/en/materials/MeshPhysicalMaterial
-    
+
     // function createGenreGeometry(genre: string): THREE.BufferGeometry {
     //     // TODO: Return a different geometry for each genre,
     //   see the documentation: https://threejs.org/docs/#api/en/geometries
@@ -257,7 +296,7 @@
     // }
     //
     // function createGenreMaterial(genre: string): THREE.Material {
-    //     // TODO: Return a material using genreColors[genre], 
+    //     // TODO: Return a material using genreColors[genre],
     //   see the documentation: https://threejs.org/docs/#api/en/materials/MeshPhysicalMaterial
     // }
 
@@ -328,8 +367,14 @@
                 const barHeight = count * 10;
                 if (barHeight === 0) return;
 
-                const geometry = new THREE.BoxGeometry(barWidth, barHeight, barWidth);
-                const material = new THREE.MeshPhysicalMaterial({ color: genreColors[genre] });
+                const geometry = new THREE.BoxGeometry(
+                    barWidth,
+                    barHeight,
+                    barWidth,
+                );
+                const material = new THREE.MeshPhysicalMaterial({
+                    color: genreColors[genre],
+                });
                 const mesh = new THREE.Mesh(geometry, material);
                 mesh.position.set(xPos, currentY + barHeight / 2, 0);
                 mesh.castShadow = true;
@@ -348,10 +393,15 @@
                 depth: 2,
             });
             textGeo.computeBoundingBox();
-            const textWidth = textGeo.boundingBox!.max.x - textGeo.boundingBox!.min.x;
+            const textWidth =
+                textGeo.boundingBox!.max.x - textGeo.boundingBox!.min.x;
             const textMat = new THREE.MeshPhysicalMaterial({ color: 0x000000 });
             const textMesh = new THREE.Mesh(textGeo, textMat);
-            textMesh.position.set(x - textWidth / 2, FLOOR + 5, barWidth / 2 + 5);
+            textMesh.position.set(
+                x - textWidth / 2,
+                FLOOR + 5,
+                barWidth / 2 + 5,
+            );
             textMesh.castShadow = true;
             scene.add(textMesh);
         });
@@ -366,8 +416,14 @@
         genres.forEach((genre, i) => {
             const y = legendStartY - i * spacing;
 
-            const swatchGeo = new THREE.BoxGeometry(swatchSize, swatchSize, swatchSize);
-            const swatchMat = new THREE.MeshPhysicalMaterial({ color: genreColors[genre] });
+            const swatchGeo = new THREE.BoxGeometry(
+                swatchSize,
+                swatchSize,
+                swatchSize,
+            );
+            const swatchMat = new THREE.MeshPhysicalMaterial({
+                color: genreColors[genre],
+            });
             const swatch = new THREE.Mesh(swatchGeo, swatchMat);
             swatch.position.set(legendX, y, 0);
             swatch.castShadow = true;
@@ -398,7 +454,8 @@
             morphs.forEach((morph) => {
                 morph.position.x += morph.speed * delta;
                 if (morph.position.x > window.innerWidth / 2) {
-                    morph.position.x = -window.innerWidth / 2 - Math.random() * 200;
+                    morph.position.x =
+                        -window.innerWidth / 2 - Math.random() * 200;
                 }
             });
 
@@ -426,7 +483,7 @@
 
 <div bind:this={container} class="container"></div>
 
-<button class="toggle-btn" onclick={() => animating = !animating}>
+<button class="toggle-btn" onclick={() => (animating = !animating)}>
     {animating ? "Pause" : "Play"} Animation
 </button>
 
@@ -444,7 +501,7 @@
         font-size: 12px;
         border: none;
         border-radius: 20px;
-        background: rgba(0, 0, 0, 0.30);
+        background: rgba(0, 0, 0, 0.3);
         color: white;
         cursor: pointer;
         z-index: 10;
