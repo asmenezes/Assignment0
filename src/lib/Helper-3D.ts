@@ -44,10 +44,10 @@ function  addMorph (
     y,
     z,
     scale,
+    rotationY = Math.PI / 2,
     
 ) {
     mesh = mesh.clone();
-    mesh.material = mesh.material.clone();
 
 
     mesh.speed = speed;
@@ -59,8 +59,13 @@ function  addMorph (
         .play();
 
     mesh.position.set(x, y, z);
-    mesh.rotation.y = Math.PI / 2;
-    mesh.castShadow = true;
+    mesh.rotation.y = rotationY;
+    mesh.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
     scene.add(mesh);
     morphs.push(mesh);
 };
@@ -74,8 +79,26 @@ function loadModels(models: T3DModel[], scene: THREE.Scene, mixer: THREE.Animati
     mixer = new THREE.AnimationMixer(scene);
     models.forEach((model) => {
         gltfLoader.load(model.path, (gltf) => {
-            const mesh = gltf.scene.children[0];
-            const clip = gltf.animations[0];
+            const mesh = gltf.scene;
+            const clip =
+                gltf.animations.find((animation) => animation.name === model.animation) ??
+                gltf.animations.find((animation) => animation.name === "idle") ??
+                gltf.animations[0];
+            if (!clip) {
+                mesh.scale.set(model.scale, model.scale, model.scale);
+                mesh.position.set(model.x, model.y, model.z);
+                mesh.rotation.y = model.rotationY ?? Math.PI / 2;
+                mesh.speed = model.speed;
+                mesh.traverse((child) => {
+                    if (child instanceof THREE.Mesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
+                scene.add(mesh);
+                morphs.push(mesh as THREE.Mesh);
+                return;
+            }
             addMorph(
                 scene,
                 mixer,
@@ -88,6 +111,7 @@ function loadModels(models: T3DModel[], scene: THREE.Scene, mixer: THREE.Animati
                 model.y,
                 model.z,
                 model.scale,
+                model.rotationY,
             );
         });
     });

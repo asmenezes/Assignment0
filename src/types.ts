@@ -10,3 +10,15 @@ export type TMovie = {
     original_title: string;
     simple_title: string;
 }
+
+export type T3DModel = {
+    path: string;
+    speed: number;
+    duration: number;
+    x: number;
+    y: number;
+    z: number;
+    scale: number;
+    animation?: string;
+    rotationY?: number;
+};

@@ -98,7 +98,7 @@
     const ORBIT_RX = 850;
     const ORBIT_RZ = 400;
 
-    let animating = $state(false);
+    let animating = $state(true);
 
     onMount(async () => {
         stackData = await loadCsv();
@@ -204,13 +204,15 @@
         // Load bird models (linear motion)
         const birdModels = [
             {
-                path: "3d/Flamingo.glb", // TODO: replace with your model
+                path: "3d/animal-penguin.glb", // TODO: replace with your model
                 speed: 350,
                 duration: 1,
                 x: 300 - Math.random() * 500,
                 y: FLOOR + 550,
                 z: 100,
-                scale: 0.5,
+                scale: 30,
+                animation: "run",
+                rotationY: Math.PI / 2,
             },
             {
                 path: "3d/Flamingo.glb", // TODO: replace with your model
