@@ -215,22 +215,24 @@
                 rotationY: Math.PI / 2,
             },
             {
-                path: "3d/Flamingo.glb", // TODO: replace with your model
+                path: "3d/animal-chick.glb", // TODO: replace with your model
                 speed: 350,
                 duration: 1,
                 x: 300 - Math.random() * 500,
                 y: FLOOR + 550,
                 z: -100,
-                scale: 0.5,
+                scale: 30,
+                animation: "run",
             },
             {
-                path: "3d/Parrot.glb", // TODO: replace with your model
+                path: "3d/animal-parrot.glb", // TODO: replace with your model
                 speed: 350,
                 duration: 0.5,
                 x: 500 - Math.random() * 500,
                 y: FLOOR + 500,
                 z: 700,
-                scale: 0.5,
+                scale: 30,
+                animation: "run",
             },
         ];
         mixer = loadModels(birdModels, scene, mixer, morphs);
@@ -243,15 +245,22 @@
             { startAngle: Math.PI, orbitSpeed: 0.4 },
         ];
         horseConfigs.forEach((config) => {
-            gltfLoader.load("3d/Horse.glb", (gltf) => {
-                // TODO: replace with your model
-                const mesh = gltf.scene.children[0].clone() as THREE.Mesh;
-                (mesh as any).material = (mesh as any).material.clone();
-                mesh.scale.set(0.5, 0.5, 0.5);
-                mesh.castShadow = true;
+            gltfLoader.load("3d/animal-deer.glb", (gltf) => {
+                const mesh = gltf.scene.clone();
+                mesh.scale.set(30, 30, 30);
+                mesh.traverse((child) => {
+                    if (child instanceof THREE.Mesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
 
                 horseMixer
-                    .clipAction(gltf.animations[0], mesh)
+                    .clipAction(
+                        gltf.animations.find((animation) => animation.name === "run") ??
+                            gltf.animations[0],
+                        mesh,
+                    )
                     .setDuration(1)
                     .startAt(-Math.random())
                     .play();
@@ -265,7 +274,7 @@
                 );
 
                 scene.add(mesh);
-                horseMorphs.push(mesh);
+                horseMorphs.push(mesh as THREE.Mesh);
             });
         });
         // === END TODO-2 ===
