@@ -364,6 +364,24 @@
                     currentY += unitSize * 2;
                 }
             });
+                        const x = xScale(row.year)! + bandwidth / 2;
+            const textGeo = new TextGeometry(row.year, {
+                font: font,
+                size: 6,
+                depth: 2,
+            });
+            textGeo.computeBoundingBox();
+            const textWidth =
+                textGeo.boundingBox!.max.x - textGeo.boundingBox!.min.x;
+            const textMat = new THREE.MeshPhysicalMaterial({ color: 0x000000 });
+            const textMesh = new THREE.Mesh(textGeo, textMat);
+            textMesh.position.set(
+                x - textWidth / 2,
+                FLOOR + 5,
+                bandwidth / 2 + 3,
+            );
+            textMesh.castShadow = true;
+            scene.add(textMesh);
         });
 
         // Year labels — you can reuse the year label code from createBars() below
