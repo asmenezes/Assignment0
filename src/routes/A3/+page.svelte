@@ -303,7 +303,7 @@
         // TODO: Return a different geometry for each genre,see the documentation: https://threejs.org/docs/#api/en/geometries
         switch (genre) {
             case "Comedy":
-                return new THREE.BoxGeometry(8, 8, 8);
+                return new THREE.BoxGeometry(10, 10, 10);
             case "Drama":
                 return new THREE.TorusGeometry( 5, 2, 50, 16 );
             case "Romance":
@@ -396,14 +396,8 @@
                 const barHeight = count * 10;
                 if (barHeight === 0) return;
 
-                const geometry = new THREE.BoxGeometry(
-                    barWidth,
-                    barHeight,
-                    barWidth,
-                );
-                const material = new THREE.MeshPhysicalMaterial({
-                    color: genreColors[genre],
-                });
+                const geometry = createGenreGeometry(genre);
+                const material = createGenreMaterial(genre);
                 const mesh = new THREE.Mesh(geometry, material);
                 mesh.position.set(xPos, currentY + barHeight / 2, 0);
                 mesh.castShadow = true;
@@ -435,6 +429,7 @@
             scene.add(textMesh);
         });
     }
+    
     // Update your new Legend code here — see TODO-3c
     function createLegend(scene: THREE.Scene, font: Font) {
         const legendX = 180;
@@ -445,14 +440,8 @@
         genres.forEach((genre, i) => {
             const y = legendStartY - i * spacing;
 
-            const swatchGeo = new THREE.BoxGeometry(
-                swatchSize,
-                swatchSize,
-                swatchSize,
-            );
-            const swatchMat = new THREE.MeshPhysicalMaterial({
-                color: genreColors[genre],
-            });
+            const swatchGeo = createGenreGeometry(genre);
+            const swatchMat = createGenreMaterial(genre);
             const swatch = new THREE.Mesh(swatchGeo, swatchMat);
             swatch.position.set(legendX, y, 0);
             swatch.castShadow = true;
