@@ -39,7 +39,7 @@
             movies = await d3.csv("./summer_movies.csv", (row) => ({
                 ...row,
                 num_votes: Number(row.num_votes),
-               runtime_minutes: Number(row.runtime_minutes),
+                runtime_minutes: Number(row.runtime_minutes),
                 genres: row.genres.split(",").map((genre) => genre.trim()),
                 year: new Date(row.year),
                 average_rating: Number(row.average_rating),
@@ -70,7 +70,7 @@
             );
         } catch (error) {
             console.error("Error loading CSV:", error);
-           return [];
+            return [];
         }
     }
     // async function loadCsv() {
@@ -176,7 +176,7 @@
             titleMesh.castShadow = true;
             scene.add(titleMesh);
 
-            createBars(scene, font);
+            createUnits(scene, font);
             createLegend(scene, font);
         });
 
@@ -257,8 +257,9 @@
 
                 horseMixer
                     .clipAction(
-                        gltf.animations.find((animation) => animation.name === "run") ??
-                            gltf.animations[0],
+                        gltf.animations.find(
+                            (animation) => animation.name === "run",
+                        ) ?? gltf.animations[0],
                         mesh,
                     )
                     .setDuration(1)
@@ -298,58 +299,75 @@
     //   Docs: https://threejs.org/docs/#api/en/geometries
     //   Docs: https://threejs.org/docs/#api/en/materials/MeshPhysicalMaterial
 
-    // function createGenreGeometry(genre: string): THREE.BufferGeometry {
-    //     // TODO: Return a different geometry for each genre,
-    //   see the documentation: https://threejs.org/docs/#api/en/geometries
-    //     //   Comedy :
-    //     //   Romance :
-    //     //   Drama   :
-    // }
-    //
-    // function createGenreMaterial(genre: string): THREE.Material {
-    //     // TODO: Return a material using genreColors[genre],
-    //   see the documentation: https://threejs.org/docs/#api/en/materials/MeshPhysicalMaterial
-    // }
+    function createGenreGeometry(genre: string): THREE.BufferGeometry {
+        // TODO: Return a different geometry for each genre,see the documentation: https://threejs.org/docs/#api/en/geometries
+        switch (genre) {
+            case "Comedy":
+                return new THREE.BoxGeometry(8, 8, 8);
+            case "Drama":
+                return new THREE.TorusGeometry( 5, 2, 50, 16 );
+            case "Romance":
+                return new THREE.TorusKnotGeometry(5, 1, 50, 16);
+            default:
+                return new THREE.CapsuleGeometry(1, 1, 4, 8, 1);
+        }
+    }
+    // new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+    function createGenreMaterial(genre: string): THREE.Material {
+        // TODO: Return a different geometry for each genre,see the documentation: https://threejs.org/docs/#api/en/geometries
+        switch (genre) {
+            case "Comedy":
+                return new THREE.MeshBasicMaterial({ color: 0xf4a261 });
+            case "Drama":
+                return new THREE.MeshBasicMaterial({ color: 0x2a9d8f });
+            case "Romance":
+                return new THREE.MeshBasicMaterial({ color: 0xe76f51 });
+            default:
+                return new THREE.MeshBasicMaterial({ color: 0xdd8822 });
+        }
+    }
 
     // TODO-3b: Implement createUnits(), then call it instead of createBars()
     //   Change line 141:  createBars(scene, font);
     //   To:               createUnits(scene, font);
     //
-    // function createUnits(scene: THREE.Scene, font: Font) {
-    //     if (stackData.length === 0) return;
-    //
-    //     const barMaxWidth = Math.min(stackData.length * 80, 1400);
-    //     const unitSize = 10; // height of each unit object
-    //
-    //     const xScale = d3
-    //         .scaleBand()
-    //         .domain(stackData.map((d) => d.year))
-    //         .range([-barMaxWidth / 2, barMaxWidth / 2])
-    //         .padding(0.1);
-    //
-    //     const bandwidth = xScale.bandwidth();
-    //
-    //     // Stack unit objects per year
-    //     stackData.forEach((row) => {
-    //         const xPos = xScale(row.year)! + bandwidth / 2;
-    //         let currentY = FLOOR;
-    //
-    //         genres.forEach((genre) => {
-    //             const count = row[genre as keyof TStackRow] as number;
-    //             for (let i = 0; i < count; i++) {
-    //                 const geo = // TODO: use createGenreGeometry(genre)
-    //                 const mat = // TODO: use createGenreMaterial(genre)
-    //                 const mesh = new THREE.Mesh(geo, mat);
-    //                 // TODO: set mesh position at (xPos, currentY + unitSize / 2, 0)
-    //                 // TODO: enable castShadow and receiveShadow
-    //                 // TODO: add mesh to scene
-    //                 // TODO: advance currentY by unitSize
-    //             }
-    //         });
-    //     });
-    //
-    //     // Year labels — you can reuse the year label code from createBars() below
-    // }
+    function createUnits(scene: THREE.Scene, font: Font) {
+        if (stackData.length === 0) return;
+
+        const barMaxWidth = Math.min(stackData.length * 80, 1400);
+        const unitSize = 10; // height of each unit object
+
+        const xScale = d3
+            .scaleBand()
+            .domain(stackData.map((d) => d.year))
+            .range([-barMaxWidth / 2, barMaxWidth / 2])
+            .padding(0.1);
+
+        const bandwidth = xScale.bandwidth();
+
+        // Stack unit objects per year
+        stackData.forEach((row) => {
+            const xPos = xScale(row.year)! + bandwidth / 2;
+            let currentY = FLOOR;
+
+            genres.forEach((genre) => {
+                const count = row[genre as keyof TStackRow] as number;
+                for (let i = 0; i < count; i++) {
+                    const geo = createGenreGeometry(genre);
+                    const mat = createGenreMaterial(genre);
+                    const mesh = new THREE.Mesh(geo, mat);
+                    mesh.position.set(xPos, currentY + unitSize, 0);
+                    // TODO: enable castShadow and receiveShadow
+                    mesh.castShadow = true;
+                    mesh.receiveShadow = true;
+                    scene.add(mesh);
+                    currentY += unitSize * 2;
+                }
+            });
+        });
+
+        // Year labels — you can reuse the year label code from createBars() below
+    }
     //
     // TODO-3c: Update createLegend() to use genre shapes and materials.
 
